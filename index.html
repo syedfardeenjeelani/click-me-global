@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js"></script>
+    <script type="module" src="script.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="w-full h-[100vh] flex justify-center items-center flex-col gap-5">
+      <div class="flex">
+        <input type="text" placeholder="Please enter your name" id="nameInput" />
+        <button
+          id="submitBtn"
+          class="rounded relative inline-flex group items-center justify-center px-3.5 py-2 m-1 cursor-pointer border-b-4 border-l-2 active:border-purple-600 active:shadow-none shadow-lg bg-gradient-to-tr from-purple-600 to-purple-500 border-purple-700 text-white"
+        >
+          <span
+            class="absolute w-0 h-0 transition-all duration-300 ease-out bg-white rounded-full group-hover:w-32 group-hover:h-32 opacity-10"
+          ></span>
+          <span class="relative">Submit</span>
+        </button>
+      </div>
+      <button
+        id="clickBtn"
+        class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group"
+      >
+        <span
+          class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"
+        ></span>
+        <span
+          class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"
+        ></span>
+        <span
+          class="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"
+        ></span>
+        <span
+          class="absolute bottom-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"
+        ></span>
+        <span
+          class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"
+        ></span>
+        <span
+          class="relative transition-colors duration-300 delay-200 group-hover:text-white ease"
+          >Click Me</span
+        >
+      </button>
+      <span id="totalClicks"></span>
+      <div class="flex gap-10">
+        <div id="name" class="hidden"></div>
+      </div>
+    </div>
+  </body>
+</html>
+
