@@ -1,6 +1,5 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjrtNW7FWTA6VCtRxpV1XsHI1tDmXz-1A",
@@ -12,10 +11,8 @@ const firebaseConfig = {
     measurementId: "G-06JPNHFM6K"
 };
 
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 
 const submitBtn = document.getElementById("submitBtn");
 const nameInput = document.getElementById("nameInput");
@@ -39,7 +36,6 @@ submitBtn.addEventListener("click", function () {
     clickBtn.classList.remove("hidden");
     userName.classList.remove("hidden");
     userName.textContent = `${valueOfInput}`;
-    getUserData(valueOfInput);
 });
 
 clickBtn.addEventListener("click", async function () {
@@ -49,38 +45,29 @@ clickBtn.addEventListener("click", async function () {
         return;
     }
 
-    const userDocRef = doc(db, "users", valueOfInput);
+    const globalDocRef = doc(db, "global", "clicks");
 
     try {
-      
-        const userDoc = await getDoc(userDocRef);
+        const globalDoc = await getDoc(globalDocRef);
 
-        if (userDoc.exists()) {
-            await updateDoc(userDocRef, {
-                clicks: increment(1),
-                name: valueOfInput
+        if (!globalDoc.exists()) {
+            await setDoc(globalDocRef, {
+                lastClickedName: valueOfInput,
+                totalClicks: 1
             });
         } else {
-          
-            await setDoc(userDocRef, {
-                name: valueOfInput,
-                clicks: 1
+            await updateDoc(globalDocRef, {
+                lastClickedName: valueOfInput,
+                totalClicks: globalDoc.data().totalClicks + 1
             });
         }
 
-        const updatedUserDoc = await getDoc(userDocRef);
-        const updatedClicks = updatedUserDoc.data().clicks;
-
-        const globalDocRef = doc(db, "global", "clicks");
-        await updateDoc(globalDocRef, {
-            totalClicks: increment(1)
-        });
-
-        const globalDoc = await getDoc(globalDocRef);
-        const globalClicks = globalDoc.data().totalClicks;
+        const updatedGlobalDoc = await getDoc(globalDocRef);
+        const globalClicks = updatedGlobalDoc.data().totalClicks;
+        const lastClickedName = updatedGlobalDoc.data().lastClickedName;
 
         totalClicks.textContent = `Total clicks around the world: ${globalClicks}`;
-        userName.textContent = `${valueOfInput} just clicked`;
+        userName.textContent = `${lastClickedName} just clicked`;
 
         userName.classList.remove("hidden");
         userName.classList.remove("fade-out");
@@ -92,40 +79,7 @@ clickBtn.addEventListener("click", async function () {
         }, 2000);
 
     } catch (error) {
-        console.error("Error updating user data: ", error);
+        console.error("Error updating global data: ", error);
     }
 });
 
-const getUserData = async (userName) => {
-    const userDocRef = doc(db, "users", userName);
-    const globalDocRef = doc(db, "global", "clicks");
-
-    try {
-        const userDoc = await getDoc(userDocRef);
-        const globalDoc = await getDoc(globalDocRef);
-
-        if (userDoc.exists()) {
-            const userClicks = userDoc.data().clicks;
-            totalClicks.textContent = `Total clicks around the world: ${globalDoc.data().totalClicks}`;
-            userName.textContent = `${userName} just clicked`;
-        } else {
-            totalClicks.textContent = `Total clicks around the world: ${globalDoc.data().totalClicks}`;
-            userName.textContent = `${userName} is the first click`;
-        }
-    } catch (error) {
-        console.error("Error fetching user data: ", error);
-    }
-};
-
-const initGlobalClicks = async () => {
-    const globalDocRef = doc(db, "global", "clicks");
-    const globalDoc = await getDoc(globalDocRef);
-
-    if (!globalDoc.exists()) {
-        await setDoc(globalDocRef, {
-            totalClicks: 0
-        });
-    }
-};
-
-initGlobalClicks();
