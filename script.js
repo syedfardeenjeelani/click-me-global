@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-app.js";
-import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.4/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAjrtNW7FWTA6VCtRxpV1XsHI1tDmXz-1A",
@@ -38,12 +38,41 @@ submitBtn.addEventListener("click", function () {
     userName.textContent = `${valueOfInput}`;
 });
 
-const globalDocRef = doc(db, "global", "clicks");
-const unsubscribe = onSnapshot(globalDocRef, (doc) => {
-    const data = doc.data();
-    if (data) {
+clickBtn.addEventListener("click", async function () {
+    const valueOfInput = nameInput.value.trim();
+    if (valueOfInput === "") {
+        alert("Please enter your name before clicking.");
+        return;
+    }
+
+    const globalDocRef = doc(db, "global", "clicks");
+
+    try {
+        const globalDocSnap = await getDoc(globalDocRef);
+
+        if (!globalDocSnap.exists()) {
+            await setDoc(globalDocRef, {
+                lastClickedName: valueOfInput,
+                totalClicks: 1
+            });
+        } else {
+            await updateDoc(globalDocRef, {
+                lastClickedName: valueOfInput,
+                totalClicks: globalDocSnap.data().totalClicks + 1
+            });
+        }
+    } catch (error) {
+        console.error("Error updating global data: ", error);
+    }
+});
+
+// Listen for real-time updates to the global document
+onSnapshot(doc(db, "global", "clicks"), (doc) => {
+    if (doc.exists()) {
+        const data = doc.data();
         totalClicks.textContent = `Total clicks around the world: ${data.totalClicks}`;
         userName.textContent = `${data.lastClickedName} just clicked`;
+
         userName.classList.remove("hidden");
         userName.classList.remove("fade-out");
         setTimeout(() => {
@@ -53,26 +82,4 @@ const unsubscribe = onSnapshot(globalDocRef, (doc) => {
             userName.classList.add("hidden");
         }, 2000);
     }
-});
-
-clickBtn.addEventListener("click", async function () {
-    const valueOfInput = nameInput.value.trim();
-    if (valueOfInput === "") {
-        alert("Please enter your name before clicking.");
-        return;
-    }
-
-    try {
-        await updateDoc(globalDocRef, {
-            lastClickedName: valueOfInput,
-            totalClicks: (await getDoc(globalDocRef)).data()?.totalClicks + 1 || 1
-        });
-    } catch (error) {
-        console.error("Error updating global data: ", error);
-    }
-});
-
-// Clean up the real-time listener when the component is unmounted
-window.addEventListener("beforeunload", () => {
-    unsubscribe();
 });
